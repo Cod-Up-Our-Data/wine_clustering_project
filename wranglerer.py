@@ -41,7 +41,22 @@ def merge_wines_df(df1,df2):
     df = pd.concat([df1,df2],axis=0,ignore_index=True)
     df.columns = [col.lower().replace(' ','_') for col in df.columns]
     return df
-    
+
+
+def concat_df():
+    '''
+    Takes in the vanilla red and white wine dataframes and returns a cleaned version that is ready
+    for exploration and further analysis
+    INPUT:
+    NONE
+    OUTPUT:
+    wines = pandas dataframe with both red and white wine prepped for exploration
+    '''
+    red, white = acquire_red_df(),acquire_white_df()
+    white['is_red'] = 0
+    red['is_red'] = 1
+    wines = pd.concat([red, white], ignore_index = True)
+    return wines
     
     
 def summarize(df):
