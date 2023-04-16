@@ -33,12 +33,15 @@ def acquire_white_df():
         df.to_csv('winequality-white.csv',index=True)
         return df
 
-def merge_wines_df(df1,df2):
+def merge_wines_df():
     '''
     Takes in two dfs (red/white) and outputs a single merged df for both
     
     '''
-    df = pd.concat([df1,df2],axis=0,ignore_index=True)
+    red,white = acquire_red_df(),acquire_white_df()
+    red['wine_color'] = 1
+    white['wine_color'] = 0
+    df = pd.concat([red,white],axis=0,ignore_index=True)
     df.columns = [col.lower().replace(' ','_') for col in df.columns]
     return df
 
