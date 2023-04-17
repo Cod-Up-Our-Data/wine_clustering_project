@@ -26,31 +26,21 @@
 #### Data Dictionary: 
 
 
-alcohol:            | float     |   measured as percentage 
-
-volatile_acidity:   | float     |   greater values indicate vinegar-like taste           
-
-sulphates:          | float     |   additive with antimicrobial/antioxidant properties 
-
-citric_acid:        | float     |   a preservative with capacity to add flavor
-
-total_SO2:          | float     |   includes free_SO2
-
-density:            | float     |   an indication of sugar/alcohol content 
-
-chlorides:          | float     |   amount of salts present
-
-fixed_acidity:      | float     |   non-volatile acids not subject to evaporation
-
-ph:                 | float     |   acidity-base measurement
-
-free_SO2:           | float     |   antimicrobial/antioxidant properties 
-
-residual_sugar:     | float     |   measured to indicate sweetness 
-
-wine_color:         | int       |   1-Red / 0-White
-
-quality:            | int       |   TARGET: rating given by a wine-tasting professional 
+|Feature |  Data type | Definition |
+|---|---|---|
+| alcohol: | float | measured as percentage |
+| volatile_acidity: | float | greater values indicate vinegar-like taste |
+| sulphates: | float | additive with antimicrobial/antioxidant properties |
+| citric_acid: | float | a preservative with capacity to add flavor |
+| total_SO2: | float | includes free_SO2 |
+| density: | float | an indication of sugar/alcohol content |
+| chlorides: | float | amount of salts present |
+| fixed_acidity: | float | non-volatile acids not subject to evaporation |
+| ph: | float | acidity-base measurement |
+| free_SO2: | float | antimicrobial/antioxidant properties |
+| residual_sugar: | float | measured to indicate sweetness |
+| wine_color: | int | 1-Red / 0-White |
+| quality: | int | TARGET: rating given by a wine-tasting professional |
 
 #### Instructions for those who wish to reproduce this work or simply follow along:
 You Will Need (ALL files must be placed in THE SAME FOLDER!):
