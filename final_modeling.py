@@ -22,10 +22,20 @@ from sklearn.metrics import mean_squared_error, r2_score
 import pandas as pd
 from sklearn.feature_selection import SelectKBest, RFE, f_regression
 from sklearn.linear_model import LinearRegression
+import final_wrangle.py as wr
 seed = 1349
 target = 'quality'
 
 ####################    
+X_train, X_validate, X_test, y_train, y_validate, y_test = wr.full_split_zillow(df)
+baseline = y_train.median()
+predictions_train = pd.DataFrame(y_train)
+predictions_validate = pd.DataFrame(y_validate)
+predictions_train['baseline'] = baseline
+predictions_validate['baseline'] = baseline
+scores = pd.DataFrame(columns=['model_name', 'features', 'scaling',
+                               'RMSE_train', 'R2_train', 'RMSE_validate', 'R2_validate', 'RMSE_difference'])
+predictions_validate['baseline'] = baseline
 
 def run_model(X_train, X_validate, scaling):
     
@@ -100,7 +110,7 @@ def full_split_wines(train, validate, test, target):
 
     return train, validate, test, y_train, y_validate, y_test
 
-
+train, validate, test = wr.wrangle()
 X_train, X_validate, X_test, y_train, y_validate, y_test = full_split_wines(train, validate, test, target)
 
 
@@ -394,6 +404,50 @@ def scale_wines_quantile(train, validate, test):
     
     return train, validate, test
 
+def run_rfe():
+    '''
+    The function accepts the X_train data set, y_train array and k-number of features to select
+    runs the RFE algorithm and returns the list of features to be selected for the modeling
+    !RFE depends on the model.
+    This function uses Linear regression
+    '''
+    # scale the data
+    #X1, X2, _ = wr.standard_scale_zillow(X_train, X_validate, X_test)
+    
+    for key in models:
+        # create a model
+        model = models[key]
+        
+        # create a RFE feature selector
+        rfe = RFE(model, n_features_to_select=4)
+        rfe.fit(X1, y_train)
+        
+        # get the optimal features for every particular model
+        f = X1.columns[rfe.get_support()].tolist()
+        
+        # fit the model with RFE features
+        model.fit(X1[f], y_train)
+        # predictions of the train set
+        y_hat_train = model.predict(X1[f])
+        # predictions of the validate set
+        y_hat_validate = model.predict(X2[f])
+        # add train set predictions to the data frame
+        col_name = str(key)+'_rfe'
+        predictions_train[col_name] = y_hat_train
+        # add validate set predictions to the data frame
+        predictions_validate[col_name] = y_hat_validate
+
+        # calculate scores train set
+        RMSE, R2 = regression_errors(y_train, y_hat_train)
+        # calculate scores validation set
+        RMSE_val, R2_val = regression_errors(y_validate, y_hat_validate)
+        diff = np.abs(RMSE - RMSE_val)
+        # calculate R2 difference
+        R2_diff = R2 - R2_val
+        # add the score results to the scores Data Frame
+        scores.loc[len(scores.index)] = [key, 'rfe', 'standard', RMSE, R2, RMSE_val, R2_val, diff, R2_diff]
+
+
 def run_model_quantile():
     XQ1, XQ2, _ = scale_wines_quantile(X_train, X_validate, X_test)
     run_model(XQ1, XQ2, 'quantile')
@@ -414,7 +468,7 @@ def select_best_model_R2(scores):
     # select top 5 models based on the RMSE score of the validate set
     top_5 = top_20.sort_values(by=['R2_validate']).head(5)
     # display top 5 models
-    display(top_5)
+    top_5
     # select the best model with the smallest difference in the RMSE scores
     best_model = top_5.sort_values(by='R2_difference').head(1)
     return best_model
@@ -426,7 +480,7 @@ def select_best_model_RMSE(scores):
     # select top 5 models based on the RMSE score of the validate set
     top_5 = top_20.sort_values(by=['RMSE_validate']).head(5)
     # display top 5 models
-    display(top_5)
+    top_5
     # select the best model with the smallest difference in the RMSE scores
     best_model = top_5.sort_values(by='RMSE_difference').head(1)
     return best_model
