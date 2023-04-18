@@ -19,7 +19,9 @@
 - Deliver: Please refer to this doc as well as the Final_Report.ipynb file for the finished version of the presentation, in addition to a brief 5-min presentation to the DS Team.
 
 #### Initial hypotheses and questions:
-#### What meaningful feature sets can be leveraged to create a model that displays the most improved predictive performance when compared to the mean baseline?  What predictor/target correlations exist that would strengthen the predictive power of model X?  What sample means show significant deviation from the overall mean?  Could these sample means indicate features to be used along with correlation information and K-Means Clustering to uncover potential sources of predictive power. 
+#### What meaningful feature sets can be leveraged to create a model that displays the most improved predictive performance when compared to the mean baseline?  
+#### What predictor/target correlations exist that would strengthen the predictive power of model X?  ####What sample means show significant deviation from the overall mean? 
+####Could these sample means indicate features to be used along with correlation information and K-Means Clustering to uncover potential sources of predictive power. 
 
 #### Data Dictionary: 
 
