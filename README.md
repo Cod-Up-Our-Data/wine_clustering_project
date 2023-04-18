@@ -1,16 +1,14 @@
 # wine_clustering_project
-#### Welcome to this initial exploration of Wine Quality Data for Red and White wines!  The context of this project is limited to ....
+#### Welcome to this initial exploration of Wine Quality Data for Red and White wines!  The context of this project is derived from the combination of two datasets which contain technical measurements and quality scores for wines in Northern Portugal.
 #### The goals of this initial exploration are as follows:
 - Create a REGRESSION model which will assign Quality_Score predictions to an unseen set of wines based upon specific drivers such as, alcohol content, volatile_acidity, chlorides, sulfates, etc...
 - Utilize clustering models within the exploration phase of the DS pipeline to assist in the discovery of meaningful insights and associations.
-- .
-- .
-- .
+- Model predictions wil be utilized by the California Wine Institute to better inform Marketing, R&D, and Supply Chain decisions taken by the Institute.
 
 #### PROJECT DESCRIPTION:
-- As a Minimally Viable Product, 
-- 
-- 
+- As a Minimally Viable Product, we intend to create a workable REGRESSION model, designed to provide useable information at a low-level of granularity. 
+- As the model becomes more refined, the level of granularity will become more sensitive to the dataset.
+- Exploration of the dataset using Clustering presents an opportunity to gain insights which could not be garnered otherwise.
 
 #### Project Planning:
 - Plan: Questions and Hypotheses
@@ -71,4 +69,8 @@ Any further assistance required, please email me at myemail@somecompany.com.
 
 #### Findings, Recommendations, and Takeaways:
 
-- 
+- Modeling results may improve by subsetting the dataset on wine_color.
+- Outliers do need to be dealt with.  Rather than setting a blanket rule for all features, a column-by-column appraoch to defining and removing outliers may prove beneficial for modeling.
+- Getting more non-technical data may prove beneficial.  How certain can we be that each Quality Score is a function of an objective process?  Does the possibility for subjective factors exist at such a magnitude that it may create noisy data?
+- Continue to tune model hyperparameters
+- Discontinue clustering attempts, as they may prove fruitless in the long run with this dataset.  Revisist this issue if we end up working with distinct datasets, subset by wine_color.
