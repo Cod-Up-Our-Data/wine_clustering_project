@@ -58,7 +58,7 @@ def wrangle():
         train, validate, test = split_wines(wines)
         return train, validate, test
 
-train, validate, test = wrangle()
+
 
 def split_wines(df):
     '''
@@ -100,3 +100,25 @@ def coorelation():
             print(f'\033[35mCorrelation:\033[0m {r:.4f}')
             print(f'\033[35mP-Value:\033[0m {p:.4f}')
         
+train, validate, test = wrangle()
+
+
+def full_split_wines(train, validate, test, target):
+    '''
+    accepts train, validate, test data sets and the name of the target variable as a parameter
+    splits the data frame into:
+    X_train, X_validate, X_test, y_train, y_validate, y_test
+    '''
+    #train, validate, test = train_validate_test_split(df, target)
+
+    #save target column
+    y_train = train[target]
+    y_validate = validate[target]
+    y_test = test[target]
+
+    #remove target column from the sets
+    train.drop(columns = target, inplace=True)
+    validate.drop(columns = target, inplace=True)
+    test.drop(columns = target, inplace=True)
+
+    return train, validate, test, y_train, y_validate, y_test

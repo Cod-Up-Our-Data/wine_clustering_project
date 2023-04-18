@@ -22,12 +22,104 @@ from sklearn.metrics import mean_squared_error, r2_score
 import pandas as pd
 from sklearn.feature_selection import SelectKBest, RFE, f_regression
 from sklearn.linear_model import LinearRegression
-import final_wrangle.py as wr
-seed = 1349
+import final_wrangle as wr
 target = 'quality'
+seed = 1349
 
 ####################    
-X_train, X_validate, X_test, y_train, y_validate, y_test = wr.full_split_zillow(df)
+col = ['volatile acidity', 'citric acid', 'residual sugar',
+       'chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density',
+       'pH', 'sulphates', 'alcohol']
+
+
+def full_split_wines(train, validate, test, target):
+    '''
+    accepts train, validate, test data sets and the name of the target variable as a parameter
+    splits the data frame into:
+    X_train, X_validate, X_test, y_train, y_validate, y_test
+    '''
+    #train, validate, test = train_validate_test_split(df, target)
+
+    #save target column
+    y_train = train[target]
+    y_validate = validate[target]
+    y_test = test[target]
+
+    #remove target column from the sets
+    train.drop(columns = target, inplace=True)
+    validate.drop(columns = target, inplace=True)
+    test.drop(columns = target, inplace=True)
+
+    return train, validate, test, y_train, y_validate, y_test
+
+def split_wines(df):
+    '''
+    This function takes in a dataframe and splits it into 3 data sets
+    Test is 20% of the original dataset, validate is .30*.80= 24% of the 
+    original dataset, and train is .70*.80= 56% of the original dataset. 
+    The function returns, in this order, train, validate and test dataframes. 
+    '''
+    #split_db class verision with random seed
+    train_validate, test = train_test_split(df, test_size=0.2, 
+                                            random_state=seed)
+    train, validate = train_test_split(train_validate, test_size=0.3, 
+                                       random_state=seed)
+    return train, validate, test
+
+
+def acquire():
+    '''
+    Obtains the vanilla version of both the red and white wine dataframe
+    INPUT:
+    NONE
+    OUTPUT:
+    red = pandas dataframe with red wine data
+    white = pandas dataframe with white wine data
+    '''
+    red = pd.read_csv('https://query.data.world/s/k6viyg23e4usmgc2joiodhf2pvcvao?dws=00000')
+    white = pd.read_csv('https://query.data.world/s/d5jg7efmkn3kq7cmrvvfkx2ww7epq7?dws=00000')
+    return red, white
+
+def wrangle():
+    '''
+    Function that acquires, prepares, and splits the wines dataframe for use as well as 
+    creating a csv.
+    INPUT:
+    NONE
+    OUTPUT:
+    .csv = ONLY IF FILE NONEXISTANT
+    wines = pandas dataframe with both red and white wine prepped for exploration
+    '''
+    if os.path.exists('wines.csv'):
+        wines = pd.read_csv('wines.csv', index_col=0)
+        train, validate, test = split_wines(wines)
+        return train, validate, test
+    else:
+        red, white = acquire()
+        wines = pd.concat([red, white], ignore_index = True)
+        wines.to_csv('wines.csv')
+        train, validate, test = split_wines(wines)
+        return train, validate, test
+
+train, validate, test = wrangle()
+
+def split_wines(df):
+    '''
+    This function takes in a dataframe and splits it into 3 data sets
+    Test is 20% of the original dataset, validate is .30*.80= 24% of the 
+    original dataset, and train is .70*.80= 56% of the original dataset. 
+    The function returns, in this order, train, validate and test dataframes. 
+    '''
+    #split_db class verision with random seed
+    train_validate, test = train_test_split(df, test_size=0.2, 
+                                            random_state=seed)
+    train, validate = train_test_split(train_validate, test_size=0.3, 
+                                       random_state=seed)
+    return train, validate, test
+
+X_train, X_validate, X_test, y_train, y_validate, y_test = full_split_wines(train, validate, test, target)
+
+
 baseline = y_train.median()
 predictions_train = pd.DataFrame(y_train)
 predictions_validate = pd.DataFrame(y_validate)
@@ -36,6 +128,8 @@ predictions_validate['baseline'] = baseline
 scores = pd.DataFrame(columns=['model_name', 'features', 'scaling',
                                'RMSE_train', 'R2_train', 'RMSE_validate', 'R2_validate', 'RMSE_difference'])
 predictions_validate['baseline'] = baseline
+
+
 
 def run_model(X_train, X_validate, scaling):
     
@@ -110,7 +204,7 @@ def full_split_wines(train, validate, test, target):
 
     return train, validate, test, y_train, y_validate, y_test
 
-train, validate, test = wr.wrangle()
+train, validate, test = wrangle()
 X_train, X_validate, X_test, y_train, y_validate, y_test = full_split_wines(train, validate, test, target)
 
 
@@ -121,7 +215,7 @@ def standard_scale_wines(train, validate, test):
     returns transformed data sets
     '''
 
-    col = ['fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar',
+    col = ['volatile acidity', 'citric acid', 'residual sugar',
        'chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density',
        'pH', 'sulphates', 'alcohol']
     
@@ -135,22 +229,24 @@ def standard_scale_wines(train, validate, test):
     
     return train, validate, test
 
+X1, X2, X3 = standard_scale_wines(X_train, X_validate, X_test)
+
 def run_model_standard():
     # runs regression models on the X_train scaled with StandardScaler()
     X1, X2, _ = standard_scale_wines(X_train, X_validate, X_test)
     run_model(X1, X2, 'standard')
 
 
-X1, X2, X3 = standard_scale_wines(X_train, X_validate, X_test)
+
 
 
 f1 = ['volatile acidity', 'chlorides', 'density']
 f2 = ['volatile acidity', 'chlorides']
 f3 = ['volatile acidity', 'chlorides', 'density', 'alcohol']
 f4 = ['volatile acidity', 'chlorides', 'density', 'alcohol', 'residual sugar']
-f5 = ['volatile acidity', 'chlorides', 'density', 'residual sugar', 'density', 'fixed acidity']
-f6 = select_kbest(X_train, y_train, 4)
-f7 = X_train.columns.tolist()
+f5 = ['volatile acidity', 'chlorides', 'density', 'residual sugar', 'density']
+f6 = ['volatile acidity', 'chlorides', 'density', 'residual sugar', 'density', 'citric acid', 'residual sugar', 'free sulfur dioxide', 'total sulfur dioxide', 'pH', 'sulphates']
+
 
 # create a dictionary with features
 features = {
@@ -160,7 +256,6 @@ features = {
     'f4':f4,
     'f5':f5,
     'f6':f6,
-    'f7':f7
 }
 
 
@@ -174,7 +269,7 @@ def regression_errors(y_actual, y_predicted):
     return RMSE, R2
 
 
-def run_best_model():
+def gradient_boost_model():
     '''
     the function runs the best model on the train, test and validate data sets 
     and returns scores in the data frame
@@ -183,7 +278,7 @@ def run_best_model():
     predictions_test = pd.DataFrame(y_test)
     predictions_test['baseline'] = baseline
 
-    f = f7
+    f = f6
     poly = PolynomialFeatures(degree=2, include_bias=False, interaction_only=False)
     poly.fit(X1[f])
 
@@ -347,7 +442,7 @@ def run_polynomial():
     This function uses Linear regression
     '''
     # scale the data
-    #X1, X2, _ = wr.standard_scale_zillow(X_train, X_validate, X_test)
+    
     
     for key in models:
         # create a model
@@ -392,7 +487,7 @@ def scale_wines_quantile(train, validate, test):
     #count_columns = ['bedroomcnt', 'bathroomcnt']
     
     #col = train.columns[1:-1]
-    col = ['volatile acidity', 'chlorides', 'density', 'residual sugar', 'density', 'fixed acidity']
+    col = ['volatile acidity', 'chlorides', 'density', 'residual sugar', 'density']
     
     # create scalers
     #min_max_scaler = MinMaxScaler()    
@@ -412,7 +507,7 @@ def run_rfe():
     This function uses Linear regression
     '''
     # scale the data
-    #X1, X2, _ = wr.standard_scale_zillow(X_train, X_validate, X_test)
+    
     
     for key in models:
         # create a model
@@ -494,7 +589,13 @@ def run_best_model():
     predictions_test = pd.DataFrame(y_test)
     predictions_test['baseline'] = baseline
 
-    f = f7
+    scores = pd.DataFrame(columns=['model_name', 'features', 'scaling',
+                               'RMSE_train', 'R2_train', 'RMSE_validate', 'R2_validate', 'RMSE_difference', 'R2_difference'])
+
+
+    f = ['volatile acidity', 'chlorides', 'density', 'residual sugar', 'density', 'citric acid', 'residual sugar', 'free sulfur dioxide', 'total sulfur dioxide', 'pH', 'sulphates']
+
+
     poly = PolynomialFeatures(degree=2, include_bias=False, interaction_only=False)
     poly.fit(X1[f])
 
