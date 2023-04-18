@@ -663,3 +663,113 @@ def run_best_model():
     final_test = pd.DataFrame({'Gradient Bosting Regression': list(res.keys()), 'Scores': list(res.values())})
 
     return final_test
+
+def general_regressor_model():
+    '''
+    the function runs the best model on the train, test and validate data sets 
+    and returns scores in the data frame
+    '''
+    # create a data frame for test set results
+    predictions_test = pd.DataFrame(y_test)
+    predictions_test['baseline'] = baseline
+
+    f = f6
+    poly = PolynomialFeatures(degree=2, include_bias=False, interaction_only=False)
+    poly.fit(X1[f])
+
+    # create a df with transformed features of the train set
+    X1_poly = pd.DataFrame(
+                poly.transform(X1[f]),
+                columns=poly.get_feature_names(X1[f].columns),
+                index=X1.index)
+    X1_poly = pd.concat([X1_poly, X1.iloc[:, 2:]], axis=1)
+
+    # create a df with transformed features for the validate set
+    X2_poly = pd.DataFrame(
+                poly.transform(X2[f]),
+                columns=poly.get_feature_names(X2[f].columns),
+                index=X2.index)
+    X2_poly = pd.concat([X2_poly, X2.iloc[:, 2:]], axis=1)
+
+    # create a df with transformed features for the validate set
+    X2_poly = pd.DataFrame(
+                poly.transform(X2[f]),
+                columns=poly.get_feature_names(X2[f].columns),
+                index=X2.index)
+    X2_poly = pd.concat([X2_poly, X2.iloc[:, 2:]], axis=1)
+
+    # create. df with transformed features for the test set
+    X3_poly = pd.DataFrame(
+                poly.transform(X3[f]),
+                columns=poly.get_feature_names(X3[f].columns),
+                index=X3.index)
+    X3_poly = pd.concat([X3_poly, X3.iloc[:, 2:]], axis=1)
+
+    # create a Gradient Boosting Regression model
+    model = TweedieRegressor()
+    # fit the model
+    model.fit(X1_poly, y_train)
+    # predictions of the train set
+    y_hat_train = model.predict(X1_poly)
+    # predictions of the validate set
+    y_hat_validate = model.predict(X2_poly)
+    # add train set predictions to the data frame
+    y_hat_test = model.predict(X3_poly)
+    predictions_test['predictions'] = y_hat_test
+
+    # calculate scores train set
+    RMSE_train, R2_train = regression_errors(y_train, y_hat_train)
+    # calculate scores validation set
+    RMSE_val, R2_val = regression_errors(y_validate, y_hat_validate)
+    # calculate scores test set
+    RMSE_test, R2_test = regression_errors(y_test, y_hat_test)
+    RMSE_bl, _ = regression_errors(y_test, predictions_test.baseline)
+    
+    # save final score into a dictionary
+    res = {
+        'Features': str(f),
+        'RMSE Train Set': RMSE_train,
+        'RMSE Validation Set':RMSE_val,
+        'RMSE Test Set':RMSE_test,
+        'R2 Train Set':R2_train,
+        'R2 Validation Set':R2_val,
+        'R2 Test':R2_test,
+        'Beats a basline by:':str(f'{round((RMSE_bl - RMSE_test) / RMSE_bl * 100, 1)}%')
+    }
+
+    # add the score results to the scores Data Frame
+    final_test = pd.DataFrame({'General Regressor Model': list(res.keys()), 'Scores': list(res.values())})
+
+    return final_test
+
+def train_validate_test(df, target):
+    '''
+    this function takes in a dataframe and splits it into 3 samples, 
+    a test, which is 20% of the entire dataframe, 
+    a validate, which is 24% of the entire dataframe,
+    and a train, which is 56% of the entire dataframe. 
+    It then splits each of the 3 samples into a dataframe with independent variables
+    and a series with the dependent, or target variable. 
+    The function returns 3 dataframes and 3 series:
+    X_train (df) & y_train (series), X_validate & y_validate, X_test & y_test. 
+    '''
+    # split df into test (20%) and train_validate (80%)
+    train_validate, test = train_test_split(df, test_size=.2, random_state=123)
+
+    # split train_validate off into train (70% of 80% = 56%) and validate (30% of 80% = 24%)
+    train, validate = train_test_split(train_validate, test_size=.3, random_state=123)
+
+        
+    # split train into X (dataframe, drop target) & y (series, keep target only)
+    X_train = train.drop(columns=[target])
+    y_train = train[target]
+    
+    # split validate into X (dataframe, drop target) & y (series, keep target only)
+    X_validate = validate.drop(columns=[target])
+    y_validate = validate[target]
+    
+    # split test into X (dataframe, drop target) & y (series, keep target only)
+    X_test = test.drop(columns=[target])
+    y_test = test[target]
+    
+    return X_train, y_train, X_validate, y_validate, X_test, y_test
